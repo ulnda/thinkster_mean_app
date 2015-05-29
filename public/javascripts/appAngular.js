@@ -44,7 +44,7 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
   $urlRouterProvider.otherwise('home');
 }]);
 
-app.factory('posts', ['$http', function($http){
+app.factory('posts', ['$http', 'auth', function($http, auth){
   var o = {
     posts: [],
 		getAll: function() {
@@ -53,15 +53,18 @@ app.factory('posts', ['$http', function($http){
 			});
 		},
 		create: function(post) {
-		  return $http.post('/posts', post).success(function(data){
+		  return $http.post('/posts', post, { 
+		  	headers: { Authorization: 'Bearer '+ auth.getToken() }
+		  }).success(function(data){
 		    o.posts.push(data);
 		  });
 		},
 		upvote: function(post) {
-		  return $http.put('/posts/' + post._id + '/upvote')
-		    .success(function(data){
-		      post.upvotes += 1;
-		  	});
+		  return $http.put('/posts/' + post._id + '/upvote' , null , {
+		  	headers: { Authorization: 'Bearer '+auth.getToken() }
+		  }).success(function(data){
+		     post.upvotes += 1;
+		  });
 		},
 		get: function(id) {
   		return $http.get('/posts/' + id).then(function(res){
@@ -69,13 +72,16 @@ app.factory('posts', ['$http', function($http){
   		});
 		},
 		addComment: function(id, comment) {
-		  return $http.post('/posts/' + id + '/comments', comment);
+		  return $http.post('/posts/' + id + '/comments', comment, {
+		  	headers: { Authorization: 'Bearer '+auth.getToken() }
+		  });
 		},
 		upvoteComment: function(post, comment) {
-		  return $http.put('/posts/' + post._id + '/comments/'+ comment._id + '/upvote')
-		  	.success(function(data){
-					comment.upvotes += 1;
-				});
+		  return $http.put('/posts/' + post._id + '/comments/'+ comment._id + '/upvote', null, {
+		  	headers: { Authorization: 'Bearer '+auth.getToken() }
+		  }).success(function(data){
+				comment.upvotes += 1;
+			});
 		}
 	}
   return o;
@@ -131,8 +137,10 @@ app.factory('posts', ['$http', function($http){
   return auth;
 }])
 
-app.controller('MainCtrl', ['$scope', 'posts', function($scope, posts){
+app.controller('MainCtrl', ['$scope', 'posts', 'auth', function($scope, posts, auth){
 	$scope.posts = posts.posts
+
+	$scope.isLoggedIn = auth.isLoggedIn;
 
 	$scope.addPost = function(){
 		if(!$scope.title || $scope.title === '') { return; }
