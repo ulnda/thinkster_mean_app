@@ -1,6 +1,6 @@
 var app = angular.module('flapperNews', ['ui.router']);
 
-app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', function($stateProvider, $urlRouterProvider, $locationProvider) {
   $stateProvider
     .state('home', {
       url: '/home',
@@ -12,16 +12,17 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
 		    }]
 		  }
     })
-    .state('posts', {
-  		url: '/posts/{id}',
-  		templateUrl: '/posts.html',
+    .state('post', {
+  		url: '/posts/:id',
+  		templateUrl: '/post.html',
   		controller: 'PostsCtrl',
 		  resolve: {
 		    post: ['$stateParams', 'posts', function($stateParams, posts) {
 		      return posts.get($stateParams.id);
 		    }]
 		  }
-		}).state('login', {
+		})
+		.state('login', {
 		  url: '/login',
 		  templateUrl: '/login.html',
 		  controller: 'AuthCtrl',
@@ -30,7 +31,8 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
 		      $state.go('home');
 		    }
 		  }]
-		}).state('register', {
+		})
+		.state('register', {
 			url: '/register',
 			templateUrl: '/register.html',
 			controller: 'AuthCtrl',
@@ -41,6 +43,7 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
 			}]
 		});
 
+	$locationProvider.html5Mode(true)
   $urlRouterProvider.otherwise('home');
 }]);
 
