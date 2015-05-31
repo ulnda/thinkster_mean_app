@@ -29,22 +29,22 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // controllers
-router = express.Router()
+var apiRouter = express.Router()
 fs.readdirSync('./controllers').forEach(function (file) {
   if(file.substr(-3) == '.js') {
       route = require('./controllers/' + file);
-      route.controller(router);
+      route.controller(apiRouter);
   }
 });
-app.use('/', router);
-app.use(passport.initialize());
+app.use('/api/', apiRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+var defaultRouter = express.Router()
+defaultRouter.get('*', function(req, res, next) {
+  res.sendfile(path.join(__dirname, 'public', 'index.html'))
 });
+app.use('/', defaultRouter);
+
+app.use(passport.initialize());
 
 // development error handler
 if (app.get('env') === 'development') {
